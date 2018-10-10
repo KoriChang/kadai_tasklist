@@ -14,29 +14,29 @@ import models.Task;
 import utils.DBUtil;
 
 /**
- * Servlet implementation class CreateServlet
+ * Servlet implementation class UpdateServlet
  */
-@WebServlet("/create")
-public class CreateServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
+@WebServlet("/update")
+public class UpdateServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
 
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public CreateServlet() {
+    public UpdateServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
+    /**
+     * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+     */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String _token = (String)request.getParameter("_token");
         if(_token != null && _token.equals(request.getSession().getId())) {
             EntityManager em = DBUtil.createEntityManager();
 
-            Task m = new Task();
+            Task m = em.find(Task.class, (Integer)(request.getSession().getAttribute("task_id")));
 
             String title = request.getParameter("title");
             m.setTitle(title);
@@ -46,12 +46,12 @@ public class CreateServlet extends HttpServlet {
 
             Timestamp currentTime = new Timestamp(System.currentTimeMillis());
             m.setUpdated_at(currentTime);
-            m.setUpdated_at(currentTime);
 
             em.getTransaction().begin();
-            em.persist(m);
             em.getTransaction().commit();
             em.close();
+
+            request.getSession().removeAttribute("task_id");
 
             response.sendRedirect(request.getContextPath() + "/index");
         }

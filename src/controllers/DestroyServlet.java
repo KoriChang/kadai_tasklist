@@ -1,7 +1,6 @@
 package controllers;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 
 import javax.persistence.EntityManager;
 import javax.servlet.ServletException;
@@ -14,44 +13,36 @@ import models.Task;
 import utils.DBUtil;
 
 /**
- * Servlet implementation class CreateServlet
+ * Servlet implementation class DestroyServlet
  */
-@WebServlet("/create")
-public class CreateServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
+@WebServlet("/destroy")
+public class DestroyServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
 
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public CreateServlet() {
+    public DestroyServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
+    /**
+     * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+     */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String _token = (String)request.getParameter("_token");
         if(_token != null && _token.equals(request.getSession().getId())) {
             EntityManager em = DBUtil.createEntityManager();
 
-            Task m = new Task();
-
-            String title = request.getParameter("title");
-            m.setTitle(title);
-
-            String content = request.getParameter("content");
-            m.setContent(content);
-
-            Timestamp currentTime = new Timestamp(System.currentTimeMillis());
-            m.setUpdated_at(currentTime);
-            m.setUpdated_at(currentTime);
+            Task m = em.find(Task.class, (Integer)(request.getSession().getAttribute("task_id")));
 
             em.getTransaction().begin();
-            em.persist(m);
+            em.remove(m);
             em.getTransaction().commit();
             em.close();
+
+            request.getSession().removeAttribute("task_id");
 
             response.sendRedirect(request.getContextPath() + "/index");
         }
